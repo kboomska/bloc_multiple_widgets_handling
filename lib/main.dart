@@ -48,48 +48,26 @@ class HandsomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = context.watch<HandsomeBloc>().state;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Bloc Multiple Widgets Handling Demo'),
       ),
-      body: BlocListener<HandsomeBloc, HandsomeState>(
-        listener: (context, state) {
-          // Тут я немного считерил со временем показа загрузки, но только
-          // для того, чтобы показать переключение между стейтами в блоке.
-          // Вообще, BlocListener здесь для работы вообще не нужен, он
-          // только показывает всплывашку с загрузкой.
-          if (state is HandsomeStateProcessing) {
-            Future.delayed(
-              const Duration(seconds: 1),
-              () {
-                Navigator.of(context).pop();
-              },
-            );
-
-            showDialog(
-              context: context,
-              barrierDismissible: false,
-              barrierColor: Colors.white54,
-              builder: (context) {
-                return const RepaintBoundary(
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              },
-            );
-          }
-        },
-        child: const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ADataWidget(),
-              BDataWidget(),
-            ],
+      body: Stack(
+        children: [
+          const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ADataWidget(),
+                BDataWidget(),
+              ],
+            ),
           ),
-        ),
+          if (state is HandsomeStateProcessing) const ProcessingWidget(),
+        ],
       ),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -201,6 +179,28 @@ class BDataWidget extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class ProcessingWidget extends StatelessWidget {
+  const ProcessingWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        ModalBarrier(
+          barrierSemanticsDismissible: false,
+          dismissible: false,
+          color: Colors.white.withOpacity(0.8),
+        ),
+        const RepaintBoundary(
+          child: Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      ],
     );
   }
 }
