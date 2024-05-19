@@ -1,6 +1,12 @@
 import 'dart:math';
 
+import 'package:bloc_multiple_widgets_handling/bloc/handsome_event.dart';
 import 'package:flutter/material.dart';
+
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'package:bloc_multiple_widgets_handling/bloc/handsome_bloc.dart';
+import 'package:bloc_multiple_widgets_handling/bloc/handsome_state.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,11 +17,24 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Создаем начальное состояние для блока.
+    final initialState = HandsomeStateIdle(
+      date: DateTime(
+        DateTime.now().year,
+        DateTime.now().month,
+        DateTime.now().day,
+      ).toString(),
+      number: '0',
+    );
+
     return MaterialApp(
       theme: ThemeData(
         useMaterial3: true,
       ),
-      home: const HandsomePage(),
+      home: BlocProvider(
+        create: (context) => HandsomeBloc(initialState),
+        child: const HandsomePage(),
+      ),
     );
   }
 }
@@ -43,7 +62,9 @@ class HandsomePage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
-            onPressed: () {},
+            onPressed: () {
+              context.read<HandsomeBloc>().add(HandsomeEventFetchDataA());
+            },
             tooltip: 'Fetch A data',
             child: const Text(
               'A',
@@ -54,7 +75,9 @@ class HandsomePage extends StatelessWidget {
           ),
           const SizedBox(width: 16),
           FloatingActionButton(
-            onPressed: () {},
+            onPressed: () {
+              context.read<HandsomeBloc>().add(HandsomeEventFetchDataB());
+            },
             tooltip: 'Fetch B data',
             child: const Text(
               'B',
@@ -80,7 +103,15 @@ class ADataWidget extends StatelessWidget {
     final color = Colors.primaries[Random().nextInt(Colors.primaries.length)];
 
     // Получение текущей даты для отображения в контейнере.
-    final date = DateTime.now().toString();
+
+    // Исходный вариант.
+    // final date = DateTime.now().toString();
+
+    // Использование блока, но с обновлением всех виджетов, зависящих от стейта.
+    // final date = context.watch<HandsomeBloc>().state.date;
+
+    // Использование блока, но с обновлением виджетов, зависящих от конкрентных данных в стейте.
+    final date = context.select((HandsomeBloc bloc) => bloc.state.date);
 
     return Container(
       height: 200,
@@ -112,7 +143,15 @@ class BDataWidget extends StatelessWidget {
     final color = Colors.primaries[Random().nextInt(Colors.primaries.length)];
 
     // Получение случайного числа для отображения в контейнере.
-    final number = Random().nextInt(10).toString();
+
+    // Исходный вариант.
+    // final number = Random().nextInt(10).toString();
+
+    // Использование блока, но с обновлением всех виджетов, зависящих от стейта.
+    // final number = context.watch<HandsomeBloc>().state.number;
+
+    // Использование блока, но с обновлением виджетов, зависящих от конкрентных данных в стейте.
+    final number = context.select((HandsomeBloc bloc) => bloc.state.number);
 
     return Container(
       height: 200,
