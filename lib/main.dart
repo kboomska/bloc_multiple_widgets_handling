@@ -1,14 +1,18 @@
 import 'dart:math';
 
-import 'package:bloc_multiple_widgets_handling/bloc/handsome_event.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:bloc_multiple_widgets_handling/bloc/bloc_observer.dart';
 import 'package:bloc_multiple_widgets_handling/bloc/handsome_bloc.dart';
+import 'package:bloc_multiple_widgets_handling/bloc/handsome_event.dart';
 import 'package:bloc_multiple_widgets_handling/bloc/handsome_state.dart';
 
 void main() {
+  // Включение логирования состояния блока в консоль.
+  Bloc.observer = const AppBlocObserver();
+
   runApp(const MyApp());
 }
 
@@ -49,16 +53,45 @@ class HandsomePage extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Bloc Multiple Widgets Handling Demo'),
       ),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ADataWidget(),
-            BDataWidget(),
-          ],
+      body: BlocListener<HandsomeBloc, HandsomeState>(
+        listener: (context, state) {
+          // Тут я немного считерил со временем показа загрузки, но только
+          // для того, чтобы показать переключение между стейтами в блоке.
+          // Вообще, BlocListener здесь для работы вообще не нужен, он
+          // только показывает всплывашку с загрузкой.
+          if (state is HandsomeStateProcessing) {
+            Future.delayed(
+              const Duration(seconds: 2),
+              () {
+                Navigator.of(context).pop();
+              },
+            );
+
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              barrierColor: Colors.white54,
+              builder: (context) {
+                return const RepaintBoundary(
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              },
+            );
+          }
+        },
+        child: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ADataWidget(),
+              BDataWidget(),
+            ],
+          ),
         ),
       ),
-      floatingActionButton: Row(
+      floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
@@ -73,7 +106,7 @@ class HandsomePage extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(height: 16),
           FloatingActionButton(
             onPressed: () {
               context.read<HandsomeBloc>().add(HandsomeEventFetchDataB());

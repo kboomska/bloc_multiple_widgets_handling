@@ -9,11 +9,11 @@ import 'package:bloc_multiple_widgets_handling/bloc/handsome_state.dart';
 class HandsomeBloc extends Bloc<HandsomeEvent, HandsomeState> {
   HandsomeBloc(super.initialState) {
     on<HandsomeEvent>(
-      (event, emit) {
+      (event, emit) async {
         if (event is HandsomeEventFetchDataA) {
-          _fetchDataA(event, emit);
+          await _fetchDataA(event, emit);
         } else if (event is HandsomeEventFetchDataB) {
-          _fetchDataB(event, emit);
+          await _fetchDataB(event, emit);
         }
       },
       transformer: sequential(),
@@ -21,12 +21,15 @@ class HandsomeBloc extends Bloc<HandsomeEvent, HandsomeState> {
   }
 
   // Действия при нажатии на A.
-  void _fetchDataA(
+  Future<void> _fetchDataA(
     HandsomeEventFetchDataA event,
     Emitter<HandsomeState> emit,
-  ) {
+  ) async {
     // Переключаемся в состояние загрузки, сохраняя данные текущего стейта.
     emit(HandsomeStateProcessing(date: state.date, number: state.number));
+
+    // Добавим задержку для состояния загрузки.
+    await Future.delayed(const Duration(seconds: 1));
 
     // Получение текущей даты.
     final newDate = DateTime.now().toString();
@@ -36,12 +39,15 @@ class HandsomeBloc extends Bloc<HandsomeEvent, HandsomeState> {
   }
 
   // Действия при нажатии на B.
-  void _fetchDataB(
+  Future<void> _fetchDataB(
     HandsomeEventFetchDataB event,
     Emitter<HandsomeState> emit,
-  ) {
+  ) async {
     // Переключаемся в состояние загрузки, сохраняя данные текущего стейта.
     emit(HandsomeStateProcessing(date: state.date, number: state.number));
+
+    // Добавим задержку для состояния загрузки.
+    await Future.delayed(const Duration(seconds: 1));
 
     // Получение случайного числа.
     final newNumber = Random().nextInt(10).toString();
