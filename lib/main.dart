@@ -61,7 +61,7 @@ class HandsomePage extends StatelessWidget {
           // только показывает всплывашку с загрузкой.
           if (state is HandsomeStateProcessing) {
             Future.delayed(
-              const Duration(seconds: 2),
+              const Duration(seconds: 1),
               () {
                 Navigator.of(context).pop();
               },
